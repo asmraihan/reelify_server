@@ -27,10 +27,23 @@ async function run() {
     client.connect();
 
     const usersCollection = client.db("reelifyDB").collection("users");
+    const classesCollection = client.db("reelifyDB").collection("classes");
+    const enrollsCollection = client.db("reelifyDB").collection("enrolls");
 
     // users apis
-    
-
+    // save user email and role (other details if needed)
+    app.put('/users/:email', async (req, res) => {
+        const email = req.params.email;
+        const user = req.body;
+        const query = { email: email }
+        const options = { upsert: true }
+        const updateDoc = {
+            $set: user
+        }
+        const result = await usersCollection.updateOne(query, updateDoc, options)
+        console.log(result)
+        res.send(result)
+    })
 
 
 

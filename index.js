@@ -53,6 +53,20 @@ async function run() {
         res.send(result)
       })
 
+      // save a class in db
+      app.post('/classes', async (req, res) => {
+        const newClass = req.body;
+        console.log(newClass)
+        const result = await classesCollection.insertOne(newClass)
+        res.send(result)
+      })
+
+      // get all approved class
+      app.get('/classes', async (req, res) => {
+        const query = { status: 'approved' }
+        const result = await classesCollection.find(query).toArray()
+        res.send(result)
+      })
 
 
 

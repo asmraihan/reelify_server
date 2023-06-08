@@ -46,6 +46,7 @@ async function run() {
 
     const usersCollection = client.db("reelifyDB").collection("users");
     const classesCollection = client.db("reelifyDB").collection("classes");
+    const selectedCollection = client.db("reelifyDB").collection("selected");
     const enrollsCollection = client.db("reelifyDB").collection("enrolls");
 
     //Generate JWT
@@ -103,6 +104,14 @@ async function run() {
       res.send(result)
     })
 
+
+    // ?selected apis
+    // save selected class in db
+    app.post('/selected', async (req, res) => {
+      const item = req.body;
+      const result = await cartCollection.insertOne(item);
+      res.send(result);
+    })
 
     //   app.get('/rooms/:email', verifyJWT, async (req, res) => { /* req er moddeh amra jwt er decoded add kore disi */
     //   const decodedEmail = req.decoded.email

@@ -25,11 +25,10 @@ const client = new MongoClient(uri, {
 // middleware function to verify jwt
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization
-  if(!authorization) {
+  if (!authorization) {
     return res.status(401).send({ error: true, message: 'Unauthorized access' })
   }
   const token = authorization.split(' ')[1]
-  console.log(token)
   // token verify
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
@@ -121,7 +120,7 @@ async function run() {
     app.get('/classes/:email', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email
       const email = req.params.email
-      if(email !== decodedEmail) {
+      if (email !== decodedEmail) {
         return res.status(403).send({ error: true, message: 'Forbidden Access' })
       }
       const query = { email: email }

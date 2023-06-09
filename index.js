@@ -96,7 +96,7 @@ async function run() {
       res.send(result)
     })
 
-    // set role as instructor
+    // set role to instructor
     app.patch('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) }
@@ -109,7 +109,7 @@ async function run() {
       res.send(result)
     })
 
-    // set role as admin
+    // set role to admin
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) }
@@ -166,20 +166,33 @@ async function run() {
       res.send(result)
     })
 
-      // set status as approved
-      app.patch('/classes/approved/:id', async (req, res) => {
-        const id = req.params.id;
-        const filter = { _id: new ObjectId(id) }
-        const updateDoc = {
-          $set: {
-            status: 'approved'
-          }
+    // set class status as approved
+    app.patch('/classes/approved/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          status: 'approved'
         }
-        const result = await classesCollection.updateOne(filter, updateDoc)
-        res.send(result)
-      })
+      }
+      const result = await classesCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
 
+    // set class status as approved
+    app.patch('/classes/denied/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          status: 'denied'
+        }
+      }
+      const result = await classesCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
 
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

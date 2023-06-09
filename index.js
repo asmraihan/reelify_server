@@ -192,7 +192,28 @@ async function run() {
       res.send(result)
     })
 
-    
+  
+/*  const updateDoc = {
+        $set: {
+          booked: status,
+        }
+      } */
+
+  //post a feedback to a class
+    app.put('/feedback/:id', async (req, res) => {
+      const {text} = req.body
+      const id = req.params.id;
+      console.log(id, text)
+      const filter = { _id: new ObjectId(req.params.id) }
+      const options = { upsert: true }
+      const updateDoc = {
+        $set: {
+          feedback: text,
+        }
+      }
+      const result = await classesCollection.updateOne(filter, updateDoc, options)
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

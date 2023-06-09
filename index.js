@@ -122,7 +122,8 @@ async function run() {
       res.send(result)
     })
 
-    //? class apis
+    //? classes apis
+
     // save a class in db
     app.post('/classes', async (req, res) => {
       const newClass = req.body;
@@ -153,18 +154,6 @@ async function run() {
       res.send(result);
     })
 
-    //   app.get('/rooms/:email', verifyJWT, async (req, res) => { /* req er moddeh amra jwt er decoded add kore disi */
-    //   const decodedEmail = req.decoded.email
-    //   // console.log(decodedEmail)
-    //   const email = req.params.email
-    //   if (email !== decodedEmail) {
-    //     return res.status(403).send({ error: true, message: 'Forbidden access' })
-    //   }
-    //   const query = { 'host.email': email }
-    //   const result = await roomsCollection.find(query).toArray()
-    //   res.send(result)
-    // })
-
     //get classes by instructor email
     app.get('/classes/:email', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email
@@ -176,6 +165,21 @@ async function run() {
       const result = await classesCollection.find(query).toArray()
       res.send(result)
     })
+
+      // set status as approved
+      app.patch('/classes/approved/:id', async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) }
+        const updateDoc = {
+          $set: {
+            status: 'approved'
+          }
+        }
+        const result = await classesCollection.updateOne(filter, updateDoc)
+        res.send(result)
+      })
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

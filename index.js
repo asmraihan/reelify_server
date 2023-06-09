@@ -73,7 +73,7 @@ async function run() {
     })
 
     // get all users
-    app.get('/allusers', verifyJWT, async (req, res) => {
+    app.get('/allusers', async (req, res) => {
       const result = await usersCollection.find().toArray()
       res.send(result);
     })

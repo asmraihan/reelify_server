@@ -72,10 +72,13 @@ async function run() {
       res.send(result)
     })
 
-    // get all users
-    app.get('/allusers', async (req, res) => {
-      const result = await usersCollection.find().toArray()
-      res.send(result);
+    // get all users excluding current user
+    app.get('/admin/allusers/:email', async (req, res) => {
+      const email = req.params.email
+      const query = { email: { $ne: email } }
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
+
     })
 
     // get a user by email

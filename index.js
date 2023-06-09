@@ -72,6 +72,12 @@ async function run() {
       res.send(result)
     })
 
+    // get all users
+    app.get('/allusers', verifyJWT, async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result);
+    })
+
     // get a user by email
     app.get('/users/:email', async (req, res) => {
       const email = req.params.email
@@ -97,6 +103,12 @@ async function run() {
       res.send(result)
     })
 
+    // get all classes
+    app.get('/allclasses', async (req, res) => {
+      const result = await classesCollection.find().toArray()
+      res.send(result)
+    })
+
     // get all approved class
     app.get('/classes', async (req, res) => {
       const query = { status: 'approved' }
@@ -109,7 +121,7 @@ async function run() {
     // save selected class in db
     app.post('/selected', async (req, res) => {
       const item = req.body;
-      const result = await cartCollection.insertOne(item);
+      const result = await selectedCollection.insertOne(item);
       res.send(result);
     })
 

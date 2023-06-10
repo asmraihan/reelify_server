@@ -96,6 +96,13 @@ async function run() {
       res.send(result)
     })
 
+     // get all instructor by role and limit it to 6 data
+      app.get('/instructors/sort', async (req, res) => {
+        const query = { role: 'instructor' }
+        const result = await usersCollection.find(query).limit(6).toArray()
+        res.send(result)
+      })
+
     // set role to instructor
     app.patch('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
@@ -142,6 +149,13 @@ async function run() {
     app.get('/classes', async (req, res) => {
       const query = { status: 'approved' }
       const result = await classesCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // get all approved class and sort by student count and limit it to 6 data
+    app.get('/classes/sort', async (req, res) => {
+      const query = { status: 'approved' }
+      const result = await classesCollection.find(query).sort({ students: -1 }).limit(6).toArray()
       res.send(result)
     })
 

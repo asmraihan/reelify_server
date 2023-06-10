@@ -47,7 +47,7 @@ async function run() {
     const usersCollection = client.db("reelifyDB").collection("users");
     const classesCollection = client.db("reelifyDB").collection("classes");
     const selectedCollection = client.db("reelifyDB").collection("selected");
-    const enrollsCollection = client.db("reelifyDB").collection("enrolls");
+    const enrolledCollection = client.db("reelifyDB").collection("enrolls");
 
     //Generate JWT
     app.post('/jwt', async (req, res) => {
@@ -57,7 +57,8 @@ async function run() {
     })
 
 
-    // ?users apis
+    //? usersCollection apis
+
     // save user email and role (other details if needed)
     app.put('/users/:email', async (req, res) => {
       const email = req.params.email;
@@ -78,7 +79,6 @@ async function run() {
       const query = { email: { $ne: email } }
       const result = await usersCollection.find(query).toArray()
       res.send(result)
-
     })
 
     // get a user by email
@@ -122,7 +122,7 @@ async function run() {
       res.send(result)
     })
 
-    //? classes apis
+    //? classesCollection apis
 
     // save a class in db
     app.post('/classes', async (req, res) => {
@@ -143,15 +143,6 @@ async function run() {
       const query = { status: 'approved' }
       const result = await classesCollection.find(query).toArray()
       res.send(result)
-    })
-
-
-    // ?selected apis
-    // save selected class in db
-    app.post('/selected', async (req, res) => {
-      const item = req.body;
-      const result = await selectedCollection.insertOne(item);
-      res.send(result);
     })
 
     //get classes by instructor email
@@ -192,12 +183,6 @@ async function run() {
       res.send(result)
     })
 
-  
-/*  const updateDoc = {
-        $set: {
-          booked: status,
-        }
-      } */
 
   //post a feedback to a class
     app.put('/feedback/:id', async (req, res) => {
@@ -214,6 +199,35 @@ async function run() {
       const result = await classesCollection.updateOne(filter, updateDoc, options)
       res.send(result)
     })
+
+    //? selectedCollection apis
+    // save selected class in db by student
+    app.post('/selected', async (req, res) => {
+      const item = req.body;
+      const result = await selectedCollection.insertOne(item);
+      res.send(result);
+    })
+
+     // get all selected class by student
+     app.get('/selected', async (req, res) => {
+      const result = await selectedCollection.find().toArray()
+      res.send(result)
+    })
+
+    //delete selected class by student
+    app.delete('/selected/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await selectedCollection.deleteOne(query)
+      res.send(result)
+    })
+
+
+    //? enrolledCollection apis (enrolls)
+    
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

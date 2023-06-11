@@ -248,11 +248,22 @@ async function run() {
       res.send(result);
     })
 
-     // get all selected class by student
-     app.get('/selected', async (req, res) => {
-      const result = await selectedCollection.find().toArray()
+     // get all selected class by student by email
+      app.get('/selected/:email', verifyJWT, async (req, res) => {
+      const decodedEmail = req.decoded.email
+      const email = req.params.email
+      if (email !== decodedEmail) {
+        return res.status(403).send({ error: true, message: 'Forbidden Access' })
+      }
+      const query = { email: email }
+      const result = await selectedCollection.find(query).toArray()
       res.send(result)
     })
+     
+    //  app.get('/selected', async (req, res) => {
+    //   const result = await selectedCollection.find().toArray()
+    //   res.send(result)
+    // })
 
     //delete selected class by student
     app.delete('/selected/:id', async (req, res) => {

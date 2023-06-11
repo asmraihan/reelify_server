@@ -335,7 +335,7 @@ async function run() {
     return res.status(403).send({ error: true, message: 'Forbidden Access' })
   }
   const query = { user: email }
-  const result = await enrolledCollection.find(query).toArray()
+  const result = await enrolledCollection.find(query).sort({ date: -1 }).toArray()
   res.send(result)
 })
 

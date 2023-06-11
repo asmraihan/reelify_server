@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const app = express()
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 //middleware
@@ -96,12 +97,12 @@ async function run() {
       res.send(result)
     })
 
-     // get all instructor by role and limit it to 6 data
-      app.get('/instructors/sort', async (req, res) => {
-        const query = { role: 'instructor' }
-        const result = await usersCollection.find(query).limit(6).toArray()
-        res.send(result)
-      })
+    // get all instructor by role and limit it to 6 data
+    app.get('/instructors/sort', async (req, res) => {
+      const query = { role: 'instructor' }
+      const result = await usersCollection.find(query).limit(6).toArray()
+      res.send(result)
+    })
 
     // set role to instructor
     app.patch('/users/instructor/:id', async (req, res) => {
@@ -130,8 +131,8 @@ async function run() {
     })
 
 
- /*  check if admin */
-     app.get('/users/admin/:email', verifyJWT, async (req, res) => {
+    /*  check if admin */
+    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       if (req.decoded.email !== email) {
         res.send({ admin: false })
@@ -142,8 +143,8 @@ async function run() {
       res.send(result)
     })
 
- /*  check if instructor */
-     app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
+    /*  check if instructor */
+    app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       if (req.decoded.email !== email) {
         res.send({ instructor: false })
@@ -197,6 +198,7 @@ async function run() {
       res.send(result)
     })
 
+
     // set class status as approved
     app.patch('/classes/approved/:id', async (req, res) => {
       const id = req.params.id;
@@ -224,9 +226,9 @@ async function run() {
     })
 
 
-  //post a feedback to a class
+    //post a feedback to a class
     app.put('/feedback/:id', async (req, res) => {
-      const {text} = req.body
+      const { text } = req.body
       const id = req.params.id;
       console.log(id, text)
       const filter = { _id: new ObjectId(req.params.id) }
@@ -248,8 +250,8 @@ async function run() {
       res.send(result);
     })
 
-     // get all selected class by student by email
-      app.get('/selected/:email', verifyJWT, async (req, res) => {
+    // get all selected class by student by email
+    app.get('/selected/:email', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email
       const email = req.params.email
       if (email !== decodedEmail) {
@@ -259,7 +261,16 @@ async function run() {
       const result = await selectedCollection.find(query).toArray()
       res.send(result)
     })
-     
+
+    //get a single classe from selected by classid id
+    app.get('/select/:classId', async (req, res) => {
+      const classId = req.params.classId;
+      console.log(classId)
+      const query = { classId: classId }
+      const result = await selectedCollection.findOne(query)
+      res.send(result)
+    })
+
     //  app.get('/selected', async (req, res) => {
     //   const result = await selectedCollection.find().toArray()
     //   res.send(result)
@@ -274,10 +285,75 @@ async function run() {
     })
 
 
+
+    //create payment intent
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100)
+      console.log(price, amount)
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ['card']
+      })
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    });
+
     //? enrolledCollection apis (enrolls)
-    
+
+    // add a class to enrolled collection
+    app.post('/payments', verifyJWT, async (req, res) => {
+      const payment = req.body;
+      // console.log(payment)
+
+      const insetResult = await enrolledCollection.insertOne(payment)
+
+      const query = { classId: payment.classId }
+      // console.log('delete ckeck query',query)
+      const deleteResult = await selectedCollection.deleteOne(query)
+
+      // decrease available seat by 1 in classes collection 
+      const classQuery = { _id: new ObjectId(payment.classId) };
+      // const query = { classId: classId }
+      const classUpdate = {
+        $inc: {
+          seats: -1
+        }
+      }
+      const classUpdateResult = await classesCollection.updateOne(classQuery, classUpdate);
 
 
+
+      res.send({ insetResult, deleteResult, classUpdateResult })
+    })
+
+
+    /* if-ty
+         // to store payment info in enrolled and deleting the existing class from selected
+        app.post('/enrolled',verifyJWT, async (req, res) => {
+            try {
+                const payment = req.body;
+                const result = await enrolledCollection.insertOne(payment);
+
+                // Delete the paid class data from the selected collection
+                const { enrolledClass } = payment;
+                const query = { _id: new ObjectId(enrolledClass._id) };
+                const deleteResult = await selectedCollection.deleteOne(query);
+
+                // Update the available seats in the classes collection
+                const classQuery = { _id: new ObjectId(enrolledClass.classId) };
+                const classUpdate = { $inc: { availableSeats: -1 } };
+                const classUpdateResult = await classCollection.updateOne(classQuery, classUpdate);
+
+                res.send({ paymentResult: result, deleteResult, classUpdateResult });
+            } catch (error) {
+                console.error('Error saving payment and deleting class data:', error);
+                res.status(500).send('Failed to save payment and delete class data');
+            }
+        });
+    */
 
 
     // Send a ping to confirm a successful connection

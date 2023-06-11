@@ -324,36 +324,21 @@ async function run() {
       }
       const classUpdateResult = await classesCollection.updateOne(classQuery, classUpdate);
 
-
-
       res.send({ insetResult, deleteResult, classUpdateResult })
     })
 
+ // get all enrolled class by student by email
+ app.get('/enrolled/:email', verifyJWT, async (req, res) => {
+  const decodedEmail = req.decoded.email
+  const email = req.params.email
+  if (email !== decodedEmail) {
+    return res.status(403).send({ error: true, message: 'Forbidden Access' })
+  }
+  const query = { user: email }
+  const result = await enrolledCollection.find(query).toArray()
+  res.send(result)
+})
 
-    /* if-ty
-         // to store payment info in enrolled and deleting the existing class from selected
-        app.post('/enrolled',verifyJWT, async (req, res) => {
-            try {
-                const payment = req.body;
-                const result = await enrolledCollection.insertOne(payment);
-
-                // Delete the paid class data from the selected collection
-                const { enrolledClass } = payment;
-                const query = { _id: new ObjectId(enrolledClass._id) };
-                const deleteResult = await selectedCollection.deleteOne(query);
-
-                // Update the available seats in the classes collection
-                const classQuery = { _id: new ObjectId(enrolledClass.classId) };
-                const classUpdate = { $inc: { availableSeats: -1 } };
-                const classUpdateResult = await classCollection.updateOne(classQuery, classUpdate);
-
-                res.send({ paymentResult: result, deleteResult, classUpdateResult });
-            } catch (error) {
-                console.error('Error saving payment and deleting class data:', error);
-                res.status(500).send('Failed to save payment and delete class data');
-            }
-        });
-    */
 
 
     // Send a ping to confirm a successful connection

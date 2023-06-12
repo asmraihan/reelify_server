@@ -43,7 +43,7 @@ const verifyJWT = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    client.connect();
+    // client.connect();
 
     const usersCollection = client.db("reelifyDB").collection("users");
     const classesCollection = client.db("reelifyDB").collection("classes");
@@ -243,6 +243,7 @@ async function run() {
     })
 
     //? selectedCollection apis
+
     // save selected class in db by student
     app.post('/selected', async (req, res) => {
       const item = req.body;
@@ -271,11 +272,6 @@ async function run() {
       res.send(result)
     })
 
-    //  app.get('/selected', async (req, res) => {
-    //   const result = await selectedCollection.find().toArray()
-    //   res.send(result)
-    // })
-
     //delete selected class by student
     app.delete('/selected/:id', async (req, res) => {
       const id = req.params.id;
@@ -283,8 +279,6 @@ async function run() {
       const result = await selectedCollection.deleteOne(query)
       res.send(result)
     })
-
-
 
     //create payment intent
     app.post('/create-payment-intent', verifyJWT, async (req, res) => {
@@ -327,18 +321,17 @@ async function run() {
       res.send({ insetResult, deleteResult, classUpdateResult })
     })
 
- // get all enrolled class by student by email
- app.get('/enrolled/:email', verifyJWT, async (req, res) => {
-  const decodedEmail = req.decoded.email
-  const email = req.params.email
-  if (email !== decodedEmail) {
-    return res.status(403).send({ error: true, message: 'Forbidden Access' })
-  }
-  const query = { user: email }
-  const result = await enrolledCollection.find(query).sort({ date: -1 }).toArray()
-  res.send(result)
-})
-
+    // get all enrolled class by student by email
+    app.get('/enrolled/:email', verifyJWT, async (req, res) => {
+      const decodedEmail = req.decoded.email
+      const email = req.params.email
+      if (email !== decodedEmail) {
+        return res.status(403).send({ error: true, message: 'Forbidden Access' })
+      }
+      const query = { user: email }
+      const result = await enrolledCollection.find(query).sort({ date: -1 }).toArray()
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection

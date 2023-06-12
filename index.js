@@ -15,12 +15,23 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mznotex.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// const client = new MongoClient(uri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
+// ? FIX new
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  maxPoolSize: 10,
 });
 
 // middleware function to verify jwt
@@ -44,6 +55,13 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // client.connect();
+    //? FIX new
+    client.connect((error)=>{
+      if(error){
+        console.log(error)
+        return;
+      }
+    });
 
     const usersCollection = client.db("reelifyDB").collection("users");
     const classesCollection = client.db("reelifyDB").collection("classes");
